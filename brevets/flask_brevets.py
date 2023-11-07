@@ -9,6 +9,7 @@ from flask import request
 import arrow  # Replacement for datetime, based on moment.js
 import acp_times  # Brevet time calculations
 import config
+import sys
 
 import logging
 
@@ -50,16 +51,40 @@ def _calc_times():
     Expects one URL-encoded argument, the number of miles.
     """
     app.logger.debug("Got a JSON request")
+    # Arugments
     km = request.args.get('km', 999, type=float)
+    date = request.args.get('date', 0, type=str)
+
+    distance = request.args.get('distance', 0, type=float)  # Request the time given
+    time = request.args.get('time', 0, type=str)    # Request the time specified
+
+    # Checking
     app.logger.debug("km={}".format(km))
     app.logger.debug("request.args: {}".format(request.args))
-    # FIXME!
-    # Right now, only the current time is passed as the start time
-    # and control distance is fixed to 200
-    # You should get these from the webpage!
-    open_time = acp_times.open_time(km, 200, arrow.now().isoformat).format('YYYY-MM-DDTHH:mm')
-    close_time = acp_times.close_time(km, 200, arrow.now().isoformat).format('YYYY-MM-DDTHH:mm')
-    result = {"open": open_time, "close": close_time}
+
+    # Formating date_time
+    date_time = date + ' ' + time + ':00'   # Fix how the date is put in to include the time as well
+    arrow_time = arrow.get(date_time, 'YYYY-MM-DD HH:mm:ss')    # Formats the date_time into arrow
+    print(arrow_time, flush= True)
+
+    open_time = arrow.get(acp_times.open_time(km, distance, arrow_time))
+    
+    # Happens on invalid input simply does not return anything helpful
+    if open_time == None:
+        return None
+
+    open_time = arrow.get(open_time)
+
+    close_time = acp_times.close_time(km, distance, arrow_time)
+    
+    # Happens on invalid input
+    if open_time == None:
+        return None
+
+    close_time = arrow.get(close_time)  
+
+    result = {"open": open_time.format('YYYY-MM-DD HH:mm'), "close": close_time.format('YYYY-MM-DD HH:mm')}
+
     return flask.jsonify(result=result)
 
 

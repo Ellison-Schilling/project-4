@@ -115,16 +115,21 @@
             var SCRIPT_ROOT = {{ request.script_root|tojson|safe }} ;
             var TIME_CALC_URL = SCRIPT_ROOT + "/_calc_times";
 
-            // FIX ME!
-            // Right now, only the kilometers are passed
-            // you need to pass much more!
-            // View flask_brevets.py for details.
             function calc_times(control) {
-              var km = control.find("input[name='km']").val();
-              var open_time_field = control.find("input[name='open']");
-              var close_time_field = control.find("input[name='close']");
+               
+               // Collect necessary variables
+               var km = control.find("input[name='km']").val();
+               console.log("\nFound km: " + km);
 
-              $.getJSON(TIME_CALC_URL, {km: km}).done(
+               var distance = $('select[name="distance"]').val();
+               var date_time = $("input[name='begin_date']").val();  // Get the date_time combo
+               var date = date_time.slice(0,10);   // Parse the date off
+               var time = date_time.slice(-5);     // Parse the time off
+
+               var open_time_field = control.find("input[name='open']");
+               var close_time_field = control.find("input[name='close']");
+
+              $.getJSON(TIME_CALC_URL, {km: km, distance:distance, date: date, time: time}).done(
                 function(data) {
                    var times = data.result;
                    console.log("Got a response: ");
