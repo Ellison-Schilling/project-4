@@ -65,7 +65,6 @@ def _calc_times():
     # Formating date_time
     date_time = date + ' ' + time + ':00'   # Fix how the date is put in to include the time as well
     arrow_time = arrow.get(date_time, 'YYYY-MM-DD HH:mm:ss')    # Formats the date_time into arrow
-    print(arrow_time, flush= True)
 
     open_time = arrow.get(acp_times.open_time(km, distance, arrow_time))
     
@@ -77,7 +76,7 @@ def _calc_times():
 
     close_time = acp_times.close_time(km, distance, arrow_time)
     
-    # Happens on invalid input
+    # Happens on invalid input does not return anything helpful
     if open_time == None:
         return None
 
